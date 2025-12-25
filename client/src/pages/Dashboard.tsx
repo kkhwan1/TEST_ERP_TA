@@ -1,6 +1,6 @@
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { useData } from "@/lib/mock-db";
+import { useItems, useTransactions } from "@/lib/api";
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend } from "recharts";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle, TrendingUp, Package, Truck, Activity } from "lucide-react";
@@ -8,23 +8,42 @@ import { useMemo } from "react";
 import { format } from "date-fns";
 
 export default function Dashboard() {
-  const { transactions, items } = useData();
+  const { data: items, isLoading: itemsLoading } = useItems();
+  const { data: transactionsData, isLoading: transactionsLoading } = useTransactions();
+
+  // Convert backend transaction data to frontend format
+  // Must be before any conditional returns to maintain hooks order
+  const transactions = useMemo(() => {
+    return (transactionsData || []).map(tx => ({
+      id: tx.id,
+      date: tx.date,
+      type: tx.type as any,
+      partnerId: tx.partner_id,
+      remarks: tx.remarks || '',
+      lines: (tx.lines || []).map(line => ({
+        id: line.id,
+        itemId: line.item_id,
+        quantity: line.quantity,
+        price: line.price,
+        amount: line.amount,
+      })),
+    }));
+  }, [transactionsData]);
 
   // Stats calculation
   const todayStr = format(new Date(), 'yyyy-MM-dd');
-  const todaysTxs = transactions.filter(tx => tx.date === todayStr);
-  
+
   const stats = useMemo(() => {
+    const todaysTxs = transactions.filter(tx => tx.date === todayStr);
     return {
       receipts: todaysTxs.filter(tx => tx.type === 'PURCHASE_RECEIPT').length,
       production: todaysTxs.filter(tx => tx.type.startsWith('PRODUCTION')).length,
       shipments: todaysTxs.filter(tx => tx.type === 'SHIPMENT').length,
     };
-  }, [todaysTxs]);
+  }, [transactions, todayStr]);
 
-  // Chart Data: Production by Process (Last 30 days usually, but let's just do "By Item" for now or Process)
+  // Chart Data: Production by Process
   const productionData = useMemo(() => {
-    // Aggregate production quantity by Process
     const data = [
       { name: 'Press', quantity: 0 },
       { name: 'Weld', quantity: 0 },
@@ -40,14 +59,25 @@ export default function Dashboard() {
     return data;
   }, [transactions]);
 
-  // Inventory Alerts (Negative Stock)
-  // This is expensive in real app, but fine for mock
-  // We need to calculate current stock for all items
-  // Let's just mock one or two alerts for demo
+  // Inventory Alerts
   const alerts = [
     { title: "재고 부족", desc: "RAW-001 (Steel Coil) 재고가 안전재고 이하입니다." },
     { title: "BOM 미등록", desc: "신규 품목 PT-002에 대한 9월 BOM이 확정되지 않았습니다." }
   ];
+
+  // Show loading state while data is being fetched
+  if (itemsLoading || transactionsLoading) {
+    return (
+      <AppLayout title="대시보드">
+        <div className="flex items-center justify-center h-64">
+          <div className="text-center">
+            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary mb-4"></div>
+            <p className="text-muted-foreground">데이터를 불러오는 중...</p>
+          </div>
+        </div>
+      </AppLayout>
+    );
+  }
 
   return (
     <AppLayout title="대시보드">
@@ -107,7 +137,7 @@ export default function Dashboard() {
                   <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
                   <XAxis dataKey="name" className="text-xs text-muted-foreground" />
                   <YAxis className="text-xs text-muted-foreground" />
-                  <Tooltip 
+                  <Tooltip
                     contentStyle={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)', borderRadius: 'var(--radius)' }}
                     itemStyle={{ color: 'var(--foreground)' }}
                   />
@@ -134,7 +164,7 @@ export default function Dashboard() {
                 </AlertDescription>
               </Alert>
             ))}
-            
+
             <div className="rounded-md border p-4">
               <div className="flex items-center space-x-4">
                 <div className="flex-1 space-y-1">

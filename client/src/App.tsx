@@ -4,15 +4,16 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/not-found";
-import { DataProvider } from "@/lib/mock-db";
 
 import Dashboard from "@/pages/Dashboard";
 import DailyEntry from "@/pages/DailyEntry";
 import Inventory from "@/pages/Inventory";
 import Items from "@/pages/Items";
+import Partners from "@/pages/Partners";
 import BOM from "@/pages/BOM";
 import Prices from "@/pages/Prices";
 import Closing from "@/pages/Closing";
+import Transactions from "@/pages/Transactions";
 
 function Router() {
   return (
@@ -21,9 +22,11 @@ function Router() {
       <Route path="/daily-entry" component={DailyEntry}/>
       <Route path="/inventory" component={Inventory}/>
       <Route path="/master" component={Items}/>
+      <Route path="/partners" component={Partners}/>
       <Route path="/bom" component={BOM} /> 
       <Route path="/prices" component={Prices} />
       <Route path="/closing" component={Closing} />
+      <Route path="/transactions" component={Transactions} />
       <Route component={NotFound} />
     </Switch>
   );
@@ -33,10 +36,8 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <DataProvider>
-          <Toaster />
-          <Router />
-        </DataProvider>
+        <Toaster />
+        <Router />
       </TooltipProvider>
     </QueryClientProvider>
   );

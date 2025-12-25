@@ -1,0 +1,32 @@
+{
+  "permissions": {
+    "allow": [
+      "Skill(subagent-driven-development)",
+      "Skill(codex-agent)",
+      "mcp__chrome-devtools__list_pages",
+      "mcp__chrome-devtools__navigate_page",
+      "mcp__chrome-devtools__take_screenshot",
+      "mcp__chrome-devtools__take_snapshot",
+      "mcp__chrome-devtools__click",
+      "mcp__chrome-devtools__fill",
+      "mcp__chrome-devtools__press_key",
+      "mcp__chrome-devtools__evaluate_script",
+      "mcp__playwright__playwright_navigate",
+      "mcp__playwright__playwright_screenshot",
+      "mcp__playwright__playwright_click",
+      "mcp__playwright__playwright_get_visible_html",
+      "mcp__playwright__playwright_evaluate",
+      "mcp__supabase__apply_migration",
+      "mcp__supabase__list_tables",
+      "mcp__supabase__list_migrations",
+      "mcp__supabase__list_projects",
+      "mcp__supabase__execute_sql",
+      "mcp__supabase__get_project",
+      "mcp__supabase__get_project_url",
+      "mcp__playwright__playwright_console_logs",
+      "mcp__chrome-devtools__list_console_messages",
+      "mcp__chrome-devtools__list_network_requests",
+      "mcp__chrome-devtools__get_network_request"
+    ]
+  }
+}
